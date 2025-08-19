@@ -1,2 +1,5 @@
 target/
 .idea/
+ffffffff
+application-dev*
+application-local*
