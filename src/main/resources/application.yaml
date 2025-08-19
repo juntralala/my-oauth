@@ -1,0 +1,15 @@
+profile:
+  default: Default
+
+spring:
+  profiles:
+    active: production,dev,example
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 14d

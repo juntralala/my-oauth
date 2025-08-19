@@ -1,0 +1,4 @@
+CREATE TABLE grant_types (
+    id VARCHAR(100) PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);

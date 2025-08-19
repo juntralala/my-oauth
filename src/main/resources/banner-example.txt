@@ -1,0 +1,3 @@
+profile yang aktif saat ini example profile
+
+@project.name@ @project.version@

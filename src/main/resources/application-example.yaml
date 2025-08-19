@@ -1,0 +1,18 @@
+logging:
+  level:
+    root: INFO
+
+spring:
+  banner:
+    location: classpath:/banner-example.txt
+  datasource:
+    username:
+    password:
+    url: jdbc:mysql://localhost:3306/db_name
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  flyway:
+    locations: classpath:/db/migration/schema
+  jpa:
+    show-sql: false
+    hibernate:
+      format_sql: false
