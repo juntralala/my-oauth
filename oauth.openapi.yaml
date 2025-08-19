@@ -1,0 +1,152 @@
+openapi: 3.1.0
+info:
+  title: my-oauth
+  version: 1.0.0
+  description: my project
+servers:
+  - url: http://localhost:8080
+    description: "OAuth that I Make by my self :D"
+paths:
+  /:
+    description: root
+    get:
+      responses:
+        200:
+          description: Just for checking is the server is online or not
+          content:
+            text/plain:
+              example: OK
+              schema:
+                contentMediaType: text/plain
+                contentEncoding: UTF-8
+  /authorize:
+    description: h
+    get:
+      parameters:
+        - in: query
+          name: response_type
+          required: true
+          schema:
+            type: string
+            enum: ["code"]
+        - in: query
+          name: client_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          required: true
+          name: redirect_uri
+          schema:
+            type: string
+        - in: query
+          name: scope
+          schema:
+            type: string
+        - in: query
+          name: state
+          schema:
+            type: string
+        - in: query
+          required: true
+          name: code_challenge
+          schema:
+            type: string
+        - in: query
+          name: code_challenge_method
+          schema:
+            type: string
+            enum: ["S256", "plain"]
+      responses:
+        302:
+          description: |
+            - Logged in: redirect to client's redirect uri
+            - Not logged in: redirect to login page to ask user fill out credentials
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              examples:
+                Logged in:
+                  value: "https://client.com/callback?code=abc124&state=123abc"
+                Not logged in:
+                  value: "https://oauthserver.com/login?response_type=code&client_id=...&scope=...&redirect_uri=...&state=...&code_challenge=..."
+  /token:
+    post:
+      operationId: exchangeToken
+      description: Exchange authorization code or refresh token for access token (OAuth 2.0 PKCE flow)
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  enum:
+                    - authorization_code
+                    - refresh_token
+                  default: authorization_code
+                code:
+                  type: string
+                  description: Authorization code from /authorize end point
+                refresh_token:
+                  type: string
+                client_id:
+                  type: string
+                redirect_uri:
+                  type: string
+                code_verifier:
+                  type: string
+                  description: PKCE code verifier
+      responses:
+        200:
+          description: "Successfully return token"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refresh_token:
+                    type: string
+                    description: Token random string yang digunakan untuk mendapatkan access token baru ketika sudah expired
+                  access_token:
+                    type: string
+                    format: jwt
+                    description: |
+                      JWT access token yang berisi claims tentang user.
+                      Contoh Payload:
+                      ```json
+                      {
+                        "sub": "user123",
+                        "role": "ADMIN",
+                        "permissions": [
+                          "document:read",
+                          "document:write"
+                        ],
+                        "iss": "https://oauthserver.com",
+                        "exp": 1735689600,
+                        "scope": "openid profile email"
+                      }
+                      ```
+                  token_type:
+                    type: string
+                    enum: ["Bearer"]
+                  expires_in:
+                    type: integer
+                  id_token:
+                    type: string
+                    format: jwt
+                    description: | 
+                      Dikirim jika menggunakan openid
+                      ```json
+                      {
+                        "username": "john",
+                        "nickname", "John Doe",
+                        "pfp": "/path/to/get/picture"
+                      }
+                      ```
+
+

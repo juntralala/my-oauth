@@ -1,0 +1,94 @@
+---
+title: oauth erd
+---
+erDiagram
+
+    usr[users] {
+        id VARCHAR(100) PK
+        username VARCHAR(255) UK
+        nickname VARCHAR(255)
+        password VARCHAR(255)
+        profile_picture VARCHAR(2048) "url to get profile picture"
+        role_id VARCHAR(100) FK
+        created_at DATETIME
+        updated_at DATETIME
+        deleted_at DATETIME
+    }
+
+    roles[roles] {
+        id VARCHAR(100) PK
+        name VARCHAR(20) UK
+    }
+
+    permissions {
+        id VARCHAR(100) PK
+        name VARCHAR(100) UK
+    }
+
+    users_permissions {
+        user_id VARCHAR(100) PK,FK
+        permission_id VARCHAR(100) PK,FK
+    }
+
+    gt[grant_types] {
+        id VARCHAR(100) PK
+        name VARCHAR(100)
+    }
+
+    acgt[auth_clients_grant_types] {
+        auth_client_id VARCHAR(100) PK,FK
+        grant_type_id VARCHAR(100) PK,FK
+        created_at DATETIME
+    }
+
+    acl[auth_clients] {
+        id VARCHAR(100) PK
+        redirect_uri VARCHAR(2048)
+        default_scopes VARCHAR(100)
+        client_secret VARCHAR(255)
+        is_confidential BOOLEAN
+        created_at DATETIME
+        updated_at DATETIME
+        deleted_at DATETIME
+    }
+
+    ac[authorization_codes] {
+        id VARCHAR(100) PK
+        user_id VARCHAR(100) FK
+        auth_client_id VARCHAR(100) FK
+        code VARCHAR(100) UK
+        scopes VARCHAR(100)
+        created_at DATETIME
+        expires_at DATETIME
+        used_at DATETIME
+        code_challenger VARCHAR(255)
+        code_challenger_method VARCHAR(10)
+    }
+
+    rt[refresh_tokens] {
+        id VARCHAR(100) PK
+        user_id VARCHAR(100) FK
+        client_id VARCHAR(100) FK
+        token VARCHAR(100) UK
+        last_used_at DATETIME
+
+        created_at DATETIME
+        revoked_at DATETIME
+%%        scopes VARCHAR(100)
+    }
+
+
+    usr }|--|| roles: have
+    usr ||--|{ users_permissions: granted
+    permissions ||--|{ users_permissions: granted
+
+    ac }|--|| acl: have
+    ac }|--|| usr: have
+
+    acl ||--|{ acgt: have
+    gt ||--|{ acgt: have
+
+    rt }|--|| usr: have
+    rt }|--|| acl: have
+
+

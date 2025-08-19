@@ -1,0 +1,25 @@
+---
+title: Login Flow
+---
+sequenceDiagram
+    actor S as User
+    participant F as Front-End
+    participant AS as Auth Server
+
+    S ->>+ F: Click Login
+    F ->>+ AS: Redirect to Authorize Endpoint
+    alt Not logged in Auth Server
+        AS ->> AS: Redirect to Login Page
+        AS ->>+ S: Ask credentials
+        S ->>- AS: Fill credentials
+        AS ->> AS: Redirect to Authorize Endpoint
+    else Already logged in Auth Server
+        Note over AS: Skip login,<br>continue flow
+    end
+
+    AS ->>+ S: Ask Permission
+    S ->>- AS : Give Permission
+    AS ->>- F: Authorization Code
+    F ->>+ AS : Get token
+    AS -->>- F: Return Token
+    F -->>- S: Access to<br>protected resource
