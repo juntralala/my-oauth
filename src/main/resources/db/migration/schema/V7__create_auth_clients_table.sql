@@ -7,6 +7,6 @@ CREATE TABLE auth_clients (
     is_confidential BOOLEAN DEFAULT FALSE,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
-    deleted_at DATETIME NOT NULL,
+    deleted_at DATETIME,
     INDEX idx_client_secret (client_secret)
 );

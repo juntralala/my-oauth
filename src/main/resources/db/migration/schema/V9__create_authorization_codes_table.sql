@@ -7,8 +7,8 @@ CREATE TABLE authorization_codes (
     created_at DATETIME NOT NULL,
     expires_at DATETIME NOT NULL,
     used_at DATETIME,
-    code_challenger VARCHAR(255),
-    code_challenger_method VARCHAR(10),
+    code_challenge VARCHAR(255),
+    code_challenge_method VARCHAR(10),
     UNIQUE KEY unique_code (code),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (auth_client_id) REFERENCES auth_clients(id)

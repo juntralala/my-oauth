@@ -1,10 +1,16 @@
 package dev.juntralala.oauth.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "authorizationCodes")
 public class AuthorizationCode {
@@ -32,7 +38,7 @@ public class AuthorizationCode {
 
     private Instant usedAt;
 
-    private String codeChallenger;
+    private String codeChallenge;
 
-    private String codeChallengerMethod;
+    private String codeChallengeMethod;
 }

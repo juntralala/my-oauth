@@ -3,7 +3,7 @@ profile:
 
 spring:
   profiles:
-    active: production,dev,example
+    active: example,dev,production
   threads:
     virtual:
       enabled: true

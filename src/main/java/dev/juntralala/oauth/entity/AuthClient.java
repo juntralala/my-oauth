@@ -2,7 +2,7 @@ package dev.juntralala.oauth.entity;
 
 import dev.juntralala.oauth.entity.converter.URIStringConverter;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,7 +11,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "auth_clients")
 public class AuthClient {

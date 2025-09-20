@@ -1,5 +1,7 @@
 target/
 .idea/
-ffffffff
+
 application-dev*
 application-local*
+*.pem
+*.log

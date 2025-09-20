@@ -1,14 +1,21 @@
 package dev.juntralala.oauth.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "permissions")
-public class Permission {
+public class Permission implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -17,5 +24,5 @@ public class Permission {
     private String name;
 
     @ManyToMany(mappedBy = "permissions", fetch = FetchType.LAZY)
-    private List<User> users;
+    transient private List<User> users;
 }

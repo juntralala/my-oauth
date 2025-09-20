@@ -1,11 +1,15 @@
 package dev.juntralala.oauth.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "grant_types")
 public class GrantType {
@@ -14,7 +18,7 @@ public class GrantType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
-    private String clientId;
+    private String name;
 
     @OneToMany(mappedBy = "grantType", fetch = FetchType.LAZY)
     private Set<AuthClientGrantType> authClientGrantTypes;
