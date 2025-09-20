@@ -47,7 +47,7 @@ public class UserService implements UserDetailsService {
         userProbe.setUsername(registerRequest.getUsername());
         boolean isUsernameAlreadyExists = userRepository.exists(Example.of(userProbe));
         if (isUsernameAlreadyExists) {
-            throw new ValidationException("Username already used");
+            throw new ValidationException("Username already exists");
         }
 
         Role role = roleService.getRole("USER");
@@ -61,5 +61,9 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
 
         return user;
+    }
+
+    public void deleteAll() {
+        userRepository.deleteAll();
     }
 }

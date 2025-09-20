@@ -8,14 +8,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256;
 
 @Configuration
 @EnableWebSecurity
@@ -25,11 +23,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(request -> request
-//                        .requestMatchers(GET, "/_next/**").permitAll()
                         .requestMatchers(POST, "/token").permitAll()
                         .requestMatchers(
                                 "/",
-                                "register",
+                                "/register",
+                                "/sapa",
+                                "/hello",
                                 "/session/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form

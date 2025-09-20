@@ -1,22 +1,29 @@
 package dev.juntralala.oauth.integration;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.juntralala.oauth.App;
+import dev.juntralala.oauth.dto.RestResponse;
 import dev.juntralala.oauth.dto.reuqest.UserRegisterRequest;
-import dev.juntralala.oauth.repository.UserRepository;
+import dev.juntralala.oauth.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 import java.net.URI;
-import java.util.Random;
+import java.security.SecureRandom;
+import java.util.List;
+import java.util.StringJoiner;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 @SpringBootTest(classes = App.class, webEnvironment = RANDOM_PORT)
 public class UserControllerTest {
@@ -26,7 +33,11 @@ public class UserControllerTest {
 
     private RestClient restClient;
 
-    private UserRepository userRepository;
+    private UserService userService;
+
+    private ObjectMapper objectMapper;
+
+    private final SecureRandom random = new SecureRandom();
 
     @Autowired
     public void setRestClient(RestClient restClient) {
@@ -34,23 +45,114 @@ public class UserControllerTest {
     }
 
     @Autowired
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 
     @Test
     public void registerSuccess() {
-        int randomNumber = new Random().nextInt();
-        UserRegisterRequest registerRequest = new UserRegisterRequest("user-" + randomNumber, "Usual User", "mypassword", "mypassword");
+        int randomNumber = random.nextInt();
+        StringJoiner joiner = new StringJoiner("&");
+        joiner.add("username=" + "user-" + randomNumber);
+        joiner.add("nickname=" + "Usual User");
+        joiner.add("password=" + "my_password");
+        joiner.add("repeatedPassword=" + "my_password");
 
         ResponseEntity<Void> response = restClient.post()
                 .uri(URI.create("http://localhost:" + port + "/register"))
-                .body(registerRequest)
+                .contentType(APPLICATION_FORM_URLENCODED)
+                .body(joiner.toString())
                 .retrieve().toBodilessEntity();
 
         Assertions.assertEquals(201, response.getStatusCode().value());
 
-        userRepository.deleteAll();
+        // try accessing protected route
+        List<String> setCookies = response.getHeaders().get("Set-Cookie");
+        ResponseEntity<Void> response2 = restClient.get().uri("http://localhost:" + port + "/user/current")
+                .cookies(cookies -> {
+                    if (setCookies != null) {
+                        for (String setCookie : setCookies) {
+                            String[] part = setCookie.split(";", 2);
+                            String[] pairKeyValue = part[0].split("=", 2);
+                            if (pairKeyValue.length == 2) {
+                                cookies.add(pairKeyValue[0], pairKeyValue[1]);
+                            }
+                        }
+                    }
+                })
+                .retrieve()
+                .toBodilessEntity();
+        Assertions.assertEquals(200, response2.getStatusCode().value());
+        userService.deleteAll();
+    }
+
+    @Test
+    public void registerFailedUsernameBlank() {
+        UserRegisterRequest registerRequest = new UserRegisterRequest(
+                "",
+                "user-1234",
+                "my_password",
+                "my_password"
+        );
+
+        MultiValueMap<String, String> form = MultiValueMap.fromSingleValue(objectMapper.convertValue(registerRequest, new TypeReference<>() {
+        }));
+        ResponseEntity<RestResponse<Void>> response = restClient.post()
+                .uri("http://localhost:" + port + "/register")
+                .contentType(APPLICATION_FORM_URLENCODED)
+                .body(form)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                })
+                .toEntity(new ParameterizedTypeReference<>() {
+                });
+
+        Assertions.assertEquals(400, response.getStatusCode().value());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertNotNull(response.getBody().getErrors());
+        Assertions.assertNotNull(response.getBody().getErrors().get("username"));
+    }
+
+    @Test
+    public void registerFailedUsernameDuplicate() {
+        String username = "user-" + random.nextInt();
+        Assertions.assertDoesNotThrow(() -> {
+            userService.register(UserRegisterRequest.builder()
+                    .username(username)
+                    .nickname("First User")
+                    .password("my_password")
+                    .repeatedPassword("my_password")
+                    .build());
+        });
+
+        UserRegisterRequest registerRequest = new UserRegisterRequest(
+                username,
+                "Second User",
+                "my_password",
+                "my_password"
+        );
+        MultiValueMap<String, String> form = MultiValueMap.fromSingleValue(objectMapper.convertValue(registerRequest, new TypeReference<>() {
+        }));
+
+        ResponseEntity<RestResponse<Void>> response = restClient.post()
+                .uri("http://localhost:" + port + "/register")
+                .contentType(APPLICATION_FORM_URLENCODED)
+                .body(form)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                })
+                .toEntity(new ParameterizedTypeReference<>() {
+                });
+
+        Assertions.assertEquals(400, response.getStatusCode().value());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertNotNull(response.getBody().getError());
+        Assertions.assertEquals("Username already exists", response.getBody().getError());
     }
 
 }
