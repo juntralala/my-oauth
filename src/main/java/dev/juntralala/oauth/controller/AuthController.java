@@ -13,6 +13,7 @@ import dev.juntralala.oauth.entity.User;
 import dev.juntralala.oauth.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -42,7 +43,7 @@ public class AuthController {
 
     @GetMapping(path = "/authorize")
     public ResponseEntity<Void> getAuthToken(
-            @ModelAttribute AuthorizeRequest authorizeRequest,
+            @Valid @ModelAttribute AuthorizeRequest authorizeRequest,
             @AuthenticationPrincipal UserPrincipal userDetails,
             HttpSession session,
             HttpServletRequest request
@@ -105,7 +106,7 @@ public class AuthController {
     }
 
     @PostMapping(path = "/token")
-    public ResponseEntity<RestResponse<TokenResponse>> getToken(@ModelAttribute TokenRequest tokenRequest) throws NoSuchAlgorithmException, JOSEException {
+    public ResponseEntity<RestResponse<TokenResponse>> getToken(@Valid @ModelAttribute TokenRequest tokenRequest) throws NoSuchAlgorithmException, JOSEException {
         TokenResponse tokenResponse = authenticationService.getToken(tokenRequest);
 
         return ResponseEntity.ok(

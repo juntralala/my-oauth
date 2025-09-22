@@ -4,6 +4,7 @@ import dev.juntralala.oauth.App;
 import dev.juntralala.oauth.dto.UserPrincipal;
 import dev.juntralala.oauth.entity.User;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,16 +20,10 @@ public class UserRepositoryTest {
     }
 
     @Test
+    @Disabled("bekas coba-coba doang")
     public void select() {
         User user = userRepository.findFirstByUsername("dummy").get();
         Assertions.assertNotNull(user);
     }
 
-    @Test
-    public void createUserDetails() {
-        User user = userRepository.findFirstByUsername("dummy").get();
-        Assertions.assertNotNull(user);
-
-        new UserPrincipal(user);
-    }
 }

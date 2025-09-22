@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.juntralala.oauth.App;
 import dev.juntralala.oauth.dto.RestResponse;
 import dev.juntralala.oauth.dto.reuqest.UserRegisterRequest;
+import dev.juntralala.oauth.repository.AuthorizationCodeRepository;
+import dev.juntralala.oauth.repository.RefreshTokenRepository;
 import dev.juntralala.oauth.service.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,10 @@ public class UserControllerTest {
 
     private UserService userService;
 
+    private RefreshTokenRepository refreshTokenRepository;
+
+    private AuthorizationCodeRepository authorizationCodeRepository;
+
     private ObjectMapper objectMapper;
 
     private final SecureRandom random = new SecureRandom();
@@ -52,6 +59,23 @@ public class UserControllerTest {
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setAuthorizationCodeRepository(AuthorizationCodeRepository authorizationCodeRepository) {
+        this.authorizationCodeRepository = authorizationCodeRepository;
+    }
+
+    @Autowired
+    public void setRefreshTokenRepository(RefreshTokenRepository refreshTokenRepository) {
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        refreshTokenRepository.deleteAll();
+        authorizationCodeRepository.deleteAll();
+        userService.deleteAll();
     }
 
     @Test
@@ -88,7 +112,6 @@ public class UserControllerTest {
                 .retrieve()
                 .toBodilessEntity();
         Assertions.assertEquals(200, response2.getStatusCode().value());
-        userService.deleteAll();
     }
 
     @Test
@@ -154,5 +177,4 @@ public class UserControllerTest {
         Assertions.assertNotNull(response.getBody().getError());
         Assertions.assertEquals("Username already exists", response.getBody().getError());
     }
-
 }

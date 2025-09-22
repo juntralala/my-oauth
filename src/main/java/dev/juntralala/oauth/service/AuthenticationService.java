@@ -105,13 +105,16 @@ public class AuthenticationService {
         MultiValueMap<String, String> errors = new LinkedMultiValueMap<>();
         validateGrantTypeExists(authorizeRequest.getResponse_type(), errors);
         AuthClient authClient = validateAuthClientExists(authorizeRequest.getClient_id(), errors);
-        validateCodeChallengeMethodSupported(authorizeRequest.getCode_challenge_method(), errors);
+        if (authorizeRequest.getCode_challenge_method() != null) {
+            validateCodeChallengeMethodSupported(authorizeRequest.getCode_challenge_method(), errors);
+        }
         if (!errors.isEmpty()) {
             throw new HttpResponseValidationException("Validation Error", errors);
         }
 
         String codeChallenge = authorizeRequest.getCode_challenge();
-        if (authorizeRequest.getCode_challenge_method().equalsIgnoreCase("S256")) {
+        String codeChallengeMethod = authorizeRequest.getCode_challenge_method();
+        if (codeChallengeMethod != null && codeChallengeMethod.equalsIgnoreCase("S256")) {
             codeChallenge = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(codeChallenge.getBytes(UTF_8)));
         }
 

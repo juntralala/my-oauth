@@ -1,6 +1,6 @@
 package dev.juntralala.oauth.exception;
 
-public class ValidationException extends Exception {
+public class ValidationException extends RuntimeException {
 
     private int statusCode;
 

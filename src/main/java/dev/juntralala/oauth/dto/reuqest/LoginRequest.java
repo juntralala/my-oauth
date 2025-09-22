@@ -1,13 +1,21 @@
 package dev.juntralala.oauth.dto.reuqest;
 
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginRequest {
 
     @Size(min = 1, max = 255)
-    public String username;
+    private String username;
 
     @Size(min = 1, max = 255)
-    public String password;
+    private String password;
 
 }
