@@ -59,7 +59,6 @@ public class JWTConfig implements ResourceLoaderAware {
                 .replaceAll("\\s+", "");
         byte[] publickeyBytes = decoder.decode(publicKeyString.getBytes(StandardCharsets.UTF_8));
         KeySpec spec = new X509EncodedKeySpec(publickeyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PublicKey publicKey = keyFactory.generatePublic(spec);
         return (RSAPublicKey) publicKey;
     }
@@ -72,7 +71,6 @@ public class JWTConfig implements ResourceLoaderAware {
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
                 .replaceAll("\\s+", "");
-        System.out.println(privateKeyString);
         byte[] privateKeyBytes = decoder.decode(privateKeyString);
         KeySpec spec = new PKCS8EncodedKeySpec(privateKeyBytes);
         PrivateKey privateKey = keyFactory.generatePrivate(spec);
